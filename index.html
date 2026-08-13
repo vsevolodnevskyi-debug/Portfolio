@@ -9,9 +9,12 @@
 <title>Vsevolod Nevskyi — AI Automation Consultant</title>
 <meta name="description" content="I turn manual, repetitive business operations into AI-powered systems that run themselves. 10+ years of delivery & operations leadership + agentic AI engineering.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%230d1512'/><text x='50' y='68' font-size='52' text-anchor='middle' fill='%2334d399' font-family='Georgia'>V</text></svg>">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- Self-hosted fonts: no third-party requests, no Google Fonts CDN.
+     Faster (same origin, no extra DNS/TLS handshake) and avoids sending
+     visitor IPs to Google, which matters under GDPR. -->
+<link rel="stylesheet" href="fonts.css">
+<link rel="preload" href="fonts/inter-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/fraunces-latin-300-normal.woff2" as="font" type="font/woff2" crossorigin>
 <style>
 :root{
   --bg:#0a0f0d;
@@ -22,7 +25,8 @@
   --muted:#8fa39a;
   --accent:#34d399;
   --accent-dim:#1a6b5a;
-  --serif:'Fraunces',Georgia,serif;
+  /* Fraunces covers Latin; Playfair Display picks up Cyrillic automatically */
+  --serif:'Fraunces','Playfair Display',Georgia,serif;
   --sans:'Inter',system-ui,sans-serif;
   --mono:'JetBrains Mono',monospace;
 }
@@ -205,6 +209,14 @@ h2{font-family:var(--serif);font-weight:400;font-size:clamp(1.8rem,3.6vw,2.6rem)
 .cform input:focus,.cform textarea:focus{outline:none;border-color:var(--accent-dim)}
 .cform textarea{resize:vertical;min-height:110px}
 .cform .hp{position:absolute;left:-9999px;opacity:0;height:0;overflow:hidden}
+.cform input.invalid,.cform textarea.invalid{border-color:#f87171}
+.cform .req{color:var(--accent);margin-left:3px}
+.cform .field-hint{font-size:.76rem;line-height:1.45;margin:-12px 0 14px;color:#fbbf24}
+.cform .field-hint:empty{margin:0}
+.cform .field-hint.bad{color:#f87171}
+.cform .field-hint button{display:inline;width:auto;margin:0;padding:0;background:none;border:none;
+  color:var(--accent);font:inherit;font-weight:600;text-decoration:underline;cursor:pointer;border-radius:0}
+.cform .field-hint button:hover:not(:disabled){transform:none;box-shadow:none;opacity:.75}
 .cform button{width:100%;padding:14px 28px;border:none;border-radius:99px;background:var(--accent);
   color:#06231a;font-family:var(--sans);font-weight:600;font-size:.92rem;cursor:pointer;
   transition:transform .2s,box-shadow .2s}
@@ -472,7 +484,7 @@ footer{border-top:1px solid var(--line);padding:32px 0;color:var(--muted);font-s
       <p data-i18n="ct.p">Tell me about your workflow, your team, or the role you're hiring for — I'll reply with concrete first steps, not a sales pitch.</p>
       <form class="cform" id="contactForm" action="https://api.web3forms.com/submit" method="POST" novalidate>
         <!-- Replace with your own key from web3forms.com (free, email-verified) -->
-        <input type="hidden" name="access_key" value="62abfd86-94a5-464f-bde1-6e3b64c159f0">
+        <input type="hidden" name="access_key" value="REPLACE_WITH_YOUR_WEB3FORMS_ACCESS_KEY">
         <input type="hidden" name="subject" value="New enquiry from nevskyi portfolio site">
         <input type="hidden" name="from_name" value="Portfolio site">
         <input type="hidden" name="site_language" id="formLang" value="en">
@@ -481,18 +493,21 @@ footer{border-top:1px solid var(--line);padding:32px 0;color:var(--muted);font-s
 
         <div class="row">
           <div>
-            <label for="cfName" data-i18n="ct.f.name">Your name</label>
+            <label for="cfName"><span data-i18n="ct.f.name">Your name</span><span class="req">*</span></label>
             <input type="text" id="cfName" name="name" required maxlength="80" autocomplete="name">
           </div>
           <div>
-            <label for="cfEmail" data-i18n="ct.f.email">Email</label>
-            <input type="email" id="cfEmail" name="email" required maxlength="120" autocomplete="email">
+            <label for="cfEmail"><span data-i18n="ct.f.email">Email</span><span class="req">*</span></label>
+            <input type="email" id="cfEmail" name="email" required maxlength="120"
+                   autocomplete="email" inputmode="email" spellcheck="false"
+                   aria-describedby="cfEmailHint">
+            <div class="field-hint" id="cfEmailHint" aria-live="polite"></div>
           </div>
         </div>
         <label for="cfCompany" data-i18n="ct.f.company">Company / role (optional)</label>
         <input type="text" id="cfCompany" name="company" maxlength="120" autocomplete="organization">
 
-        <label for="cfMsg" data-i18n="ct.f.msg">What would you like to solve?</label>
+        <label for="cfMsg"><span data-i18n="ct.f.msg">What would you like to solve?</span><span class="req">*</span></label>
         <textarea id="cfMsg" name="message" required maxlength="2000"></textarea>
 
         <button type="submit" id="cfSubmit" data-i18n="ct.f.send">Send message</button>

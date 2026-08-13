@@ -257,17 +257,123 @@ document.querySelectorAll('[data-track]').forEach(el => {
     en: { sending: 'Sending…', ok: 'Thank you — your message is on its way. I usually reply within one working day.',
           err: 'Something went wrong. Please email me directly at vsevolod.nevskyi@gmail.com.',
           slow: 'Please wait a moment before sending again.',
-          invalid: 'Please fill in your name, a valid email, and a message.' },
+          invalid: 'Please fill in your name, a valid email, and a message.',
+          emailRequired: 'Email is required — otherwise I have no way to reply.',
+          emailFormat: 'This does not look like a valid email address.',
+          emailNoDot: 'The domain looks incomplete — did you miss the ending, like .com?',
+          didYouMean: 'Did you mean', useIt: 'use it' },
     uk: { sending: 'Надсилаю…', ok: 'Дякую — ваше повідомлення надіслано. Зазвичай відповідаю протягом одного робочого дня.',
           err: 'Щось пішло не так. Напишіть мені напряму: vsevolod.nevskyi@gmail.com.',
           slow: 'Зачекайте трохи, перш ніж надсилати ще раз.',
-          invalid: 'Будь ласка, вкажіть імʼя, коректний email і повідомлення.' },
+          invalid: 'Будь ласка, вкажіть імʼя, коректний email і повідомлення.',
+          emailRequired: 'Email обовʼязковий — інакше я не зможу вам відповісти.',
+          emailFormat: 'Це не схоже на коректну адресу пошти.',
+          emailNoDot: 'Домен виглядає неповним — можливо, бракує закінчення, наприклад .com?',
+          didYouMean: 'Можливо, ви мали на увазі', useIt: 'підставити' },
     sv: { sending: 'Skickar…', ok: 'Tack — ditt meddelande är skickat. Jag svarar oftast inom en arbetsdag.',
           err: 'Något gick fel. Mejla mig direkt på vsevolod.nevskyi@gmail.com.',
           slow: 'Vänta en stund innan du skickar igen.',
-          invalid: 'Fyll i ditt namn, en giltig e-postadress och ett meddelande.' }
+          invalid: 'Fyll i ditt namn, en giltig e-postadress och ett meddelande.',
+          emailRequired: 'E-post krävs — annars kan jag inte svara dig.',
+          emailFormat: 'Det här ser inte ut som en giltig e-postadress.',
+          emailNoDot: 'Domänen ser ofullständig ut — saknas ändelsen, till exempel .com?',
+          didYouMean: 'Menade du', useIt: 'använd den' }
   };
   const t = (k) => (MSG[document.documentElement.lang] || MSG.en)[k];
+
+  /* ----- email validation -----
+     Note: this checks that an address is well-formed and catches likely typos.
+     Confirming that a mailbox actually exists is impossible from the browser —
+     it needs a server-side SMTP or verification-API lookup. */
+  const email = document.getElementById('cfEmail');
+  const emailHint = document.getElementById('cfEmailHint');
+
+  const EMAIL_RE = /^[A-Za-z0-9._%+'-]+@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}$/;
+
+  const KNOWN_DOMAINS = [
+    'gmail.com','googlemail.com','outlook.com','hotmail.com','live.com','msn.com',
+    'yahoo.com','yahoo.co.uk','icloud.com','me.com','mac.com','aol.com',
+    'proton.me','protonmail.com','pm.me','gmx.com','gmx.net','mail.com','zoho.com',
+    'ukr.net','i.ua','meta.ua','yandex.ru','mail.ru','rambler.ru',
+    'telia.com','hotmail.se','live.se','spray.se','bredband.net','comhem.se','outlook.se'
+  ];
+
+  /* Damerau-Levenshtein (optimal string alignment): counts a swap of two
+     adjacent letters as one mistake, which is what "gmial" instead of
+     "gmail" actually is — plain Levenshtein would score that as two. */
+  function editDistance(a, b) {
+    if (a === b) return 0;
+    const m = a.length, n = b.length;
+    if (!m || !n) return m || n;
+    const d = Array.from({ length: m + 1 }, (_, i) =>
+      Array.from({ length: n + 1 }, (_, j) => (i === 0 ? j : j === 0 ? i : 0)));
+    for (let i = 1; i <= m; i++) {
+      for (let j = 1; j <= n; j++) {
+        const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+        d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + cost);
+        if (i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) {
+          d[i][j] = Math.min(d[i][j], d[i - 2][j - 2] + 1);
+        }
+      }
+    }
+    return d[m][n];
+  }
+
+  function suggestDomain(domain) {
+    if (KNOWN_DOMAINS.includes(domain)) return null;
+    let best = null, bestDist = 99;
+    for (const d of KNOWN_DOMAINS) {
+      const dist = editDistance(domain, d);
+      if (dist < bestDist) { bestDist = dist; best = d; }
+    }
+    /* only suggest when it is clearly a near-miss, not a different address */
+    const limit = best && best.length <= 9 ? 1 : 2;
+    return bestDist > 0 && bestDist <= limit ? best : null;
+  }
+
+  function clearHint() { emailHint.textContent = ''; emailHint.className = 'field-hint'; email.classList.remove('invalid'); }
+
+  /* returns true when the field is good enough to send */
+  function checkEmail(showRequired) {
+    const val = email.value.trim();
+    clearHint();
+
+    if (!val) {
+      if (showRequired) {
+        emailHint.textContent = t('emailRequired');
+        emailHint.className = 'field-hint bad';
+        email.classList.add('invalid');
+      }
+      return false;
+    }
+
+    if (!EMAIL_RE.test(val)) {
+      const afterAt = val.split('@')[1];
+      emailHint.textContent = (afterAt && !afterAt.includes('.')) ? t('emailNoDot') : t('emailFormat');
+      emailHint.className = 'field-hint bad';
+      email.classList.add('invalid');
+      return false;
+    }
+
+    /* well-formed — look for a likely typo in the domain */
+    const [local, domain] = val.split('@');
+    const fix = suggestDomain(domain.toLowerCase());
+    if (fix) {
+      emailHint.className = 'field-hint';
+      emailHint.textContent = t('didYouMean') + ' ';
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = local + '@' + fix;
+      b.addEventListener('click', () => { email.value = local + '@' + fix; clearHint(); });
+      emailHint.appendChild(b);
+      emailHint.appendChild(document.createTextNode('? '));
+      /* a suggestion is advisory — the address may still be correct */
+    }
+    return true;
+  }
+
+  email.addEventListener('blur', () => checkEmail(false));
+  email.addEventListener('input', () => { if (email.classList.contains('invalid')) checkEmail(false); });
 
   /* client-side rate limit: max 3 sends per 10 minutes, min 20s between sends.
      This is a UX guard only — the real limit is enforced by the form provider. */
@@ -298,9 +404,19 @@ document.querySelectorAll('[data-track]').forEach(el => {
       return;
     }
 
+    /* email gets its own check so the person sees exactly what is wrong */
+    if (!checkEmail(true)) {
+      statusEl.className = 'status';
+      statusEl.textContent = '';
+      email.focus();
+      return;
+    }
+
     if (!form.checkValidity()) {
       statusEl.className = 'status err';
       statusEl.textContent = t('invalid');
+      const firstBad = form.querySelector(':invalid');
+      if (firstBad) firstBad.focus();
       return;
     }
 
@@ -321,6 +437,7 @@ document.querySelectorAll('[data-track]').forEach(el => {
         statusEl.className = 'status ok';
         statusEl.textContent = t('ok');
         form.reset();
+        clearHint();
         try { if (window.va) window.va('event', { name: 'contact_form_sent' }); } catch (err) {}
       } else {
         throw new Error('submit failed');

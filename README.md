@@ -9,7 +9,7 @@ A single-page portfolio for an AI Automation Consultant: three languages, an emb
 Most portfolio sites pull in a framework, a component library, and three analytics scripts to render what is essentially one page of text. This one does none of that, on purpose:
 
 - **No build step.** Clone it, open `index.html`, and you are looking at the production site. What you edit is what ships.
-- **No dependencies.** No React, no jQuery, no bundler. Nothing in the supply chain to compromise, nothing to keep patched.
+- **No dependencies, no third-party requests.** No React, no jQuery, no bundler, and no CDN — fonts are self-hosted, so the page makes zero external calls. Nothing in the supply chain to compromise, and no visitor IP leaks to Google Fonts (which matters under GDPR).
 - **Strict CSP without `unsafe-inline`.** All JavaScript lives in `app.js` rather than inline `<script>` tags, which is what makes a genuinely strict Content Security Policy possible.
 - **Three languages from one file.** A small `data-i18n` system swaps text, page title, and the video track per language, and remembers the choice.
 
@@ -20,9 +20,21 @@ Total payload: ~65 KB of code plus media.
 ```
 index.html      markup + styles (inline <style>, allowed by CSP)
 app.js          i18n dictionaries, language switcher, video, contact form
+fonts.css       @font-face declarations, split by unicode-range
+fonts/          self-hosted woff2 subsets (SIL Open Font License)
 vercel.json     security headers and cache policy
 assets/         video intros and poster frames
 ```
+
+### A note on the serif
+
+Fraunces has no Cyrillic glyphs, so Ukrainian headings fall back to Playfair Display — declared next in the stack, which the browser resolves per character with no extra logic:
+
+```css
+--serif: 'Fraunces', 'Playfair Display', Georgia, serif;
+```
+
+Fonts are subset by script (`latin`, `latin-ext`, `cyrillic`) with matching `unicode-range` rules, so a visitor reading the English page never downloads the Cyrillic files.
 
 ## How the language switcher works
 
