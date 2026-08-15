@@ -404,7 +404,7 @@ footer{border-top:1px solid var(--line);padding:32px 0;color:var(--muted);font-s
         <b data-i18n="proj.ghb">All projects live on GitHub</b>
         <span data-i18n="proj.ghs">Open source, MIT-licensed where possible — free to fork and use.</span>
       </div>
-      <a class="gh-btn" href="https://github.com/" target="_blank" rel="noopener" data-i18n="proj.ghbtn">View GitHub profile →</a>
+      <a class="gh-btn" href="https://github.com/vsevolodnevskyi-debug" target="_blank" rel="noopener" data-track="github" data-i18n="proj.ghbtn">View GitHub profile →</a>
     </div>
 
     <div class="proj-grid">
@@ -415,7 +415,7 @@ footer{border-top:1px solid var(--line);padding:32px 0;color:var(--muted);font-s
         </div>
         <p data-i18n="proj.c1p">A set of Claude Code agents and MCP integrations for recurring business operations: research pipelines, document generation, and task orchestration across Notion, Google Workspace, and email.</p>
         <div class="chips"><span class="chip">Claude Code</span><span class="chip">MCP</span><span class="chip">Notion API</span></div>
-        <a class="p-link soon" href="#" data-i18n="proj.link.soon">Repository in preparation</a>
+        <a class="p-link" href="https://github.com/vsevolodnevskyi-debug/agentic-ops-toolkit" target="_blank" rel="noopener" data-track="repo-toolkit" data-i18n="proj.link.repo">View repository →</a>
       </div>
 
       <div class="proj reveal">
@@ -425,27 +425,17 @@ footer{border-top:1px solid var(--line);padding:32px 0;color:var(--muted);font-s
         </div>
         <p data-i18n="proj.c2p">A single-file, dependency-free portfolio: built-in three-language i18n, scroll animations, and an embedded video intro — no framework, no build step, deploys anywhere in under a minute.</p>
         <div class="chips"><span class="chip">HTML</span><span class="chip">CSS</span><span class="chip">Vanilla JS</span><span class="chip">i18n</span></div>
-        <a class="p-link soon" href="#" data-i18n="proj.link.soon">Repository in preparation</a>
+        <a class="p-link" href="https://github.com/vsevolodnevskyi-debug/portfolio" target="_blank" rel="noopener" data-track="repo-portfolio" data-i18n="proj.link.repo">View repository →</a>
       </div>
 
       <div class="proj reveal">
         <div class="p-top">
-          <h3 data-i18n="proj.c3h">Job search automation</h3>
+          <h3 data-i18n="proj.c3h">Custom plugins &amp; skills</h3>
           <span class="p-badge" data-i18n="proj.badge.wip">In progress</span>
         </div>
-        <p data-i18n="proj.c3p">A scheduled agent that searches job APIs daily, filters by profile fit, tracks everything in a spreadsheet, and generates a tailored CV and cover letter for each matching role.</p>
-        <div class="chips"><span class="chip">Agents</span><span class="chip">Job APIs</span><span class="chip">docx</span><span class="chip">openpyxl</span></div>
-        <a class="p-link soon" href="#" data-i18n="proj.link.soon">Repository in preparation</a>
-      </div>
-
-      <div class="proj reveal">
-        <div class="p-top">
-          <h3 data-i18n="proj.c4h">Custom plugins &amp; skills</h3>
-          <span class="p-badge" data-i18n="proj.badge.wip">In progress</span>
-        </div>
-        <p data-i18n="proj.c4p">Reusable skills and plugins that package a workflow once and run it reliably every time — the building blocks I use in client automations, released for anyone to reuse.</p>
-        <div class="chips"><span class="chip">Skills</span><span class="chip">Plugins</span><span class="chip">Automation</span></div>
-        <a class="p-link soon" href="#" data-i18n="proj.link.soon">Repository in preparation</a>
+        <p data-i18n="proj.c3p">Reusable skills that package a workflow once and then run it the same way every time — document generation, structured research, recurring reporting. The building blocks behind the client automations, published as they mature.</p>
+        <div class="chips"><span class="chip">Claude skills</span><span class="chip">Node.js</span><span class="chip">MCP</span><span class="chip">Automation</span></div>
+        <a class="p-link" href="https://github.com/vsevolodnevskyi-debug" target="_blank" rel="noopener" data-track="repo-skills" data-i18n="proj.link.repo">View repository →</a>
       </div>
     </div>
   </div>
@@ -534,6 +524,10 @@ footer{border-top:1px solid var(--line);padding:32px 0;color:var(--muted);font-s
   </footer>
 </div>
 
+<!-- Vercel Web Analytics: served from this same origin, so the strict
+     script-src 'self' policy covers it. No cookies, no fingerprinting,
+     no consent banner required. Does nothing until enabled in the dashboard. -->
+<script defer src="/_vercel/insights/script.js"></script>
 <script src="app.js" defer></script>
 </body>
 </html>
